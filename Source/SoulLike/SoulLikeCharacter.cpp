@@ -11,7 +11,6 @@
 #include "EnhancedInputSubsystems.h"
 #include <Kismet/GameplayStatics.h>
 
-
 //////////////////////////////////////////////////////////////////////////
 // ASoulLikeCharacter
 
@@ -48,8 +47,6 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
 void ASoulLikeCharacter::BeginPlay()
@@ -68,18 +65,26 @@ void ASoulLikeCharacter::BeginPlay()
 
 	if (GetMesh() && GetMesh()->GetAnimInstance())
 	{
-
-		UE_LOG(LogTemp, Warning, TEXT("GetMesh() && GetMesh()->GetAnimInstance()"));
 		GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ASoulLikeCharacter::OnMontageEnded);
 	}
 
+	//Load Player Data
 	CurrentBulletCnt = 4;
+	MaxHp = 100;
+	CurrentHp = 100;
+	MaxStamina = 120;
+	CurrentStamina = 120;
+	StaminaRecoveryRate = 20.f;
+	AimStaminaCost = 15.f;
+	FireStaminaCost = 30.f;
 }
 
 void ASoulLikeCharacter::Tick(float delta)
 {
 	Super::Tick(delta);
 	CheckCameraLoc(delta);
+	TickHpLogic(delta);
+	TickStaminaLogic(delta);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -97,6 +102,46 @@ void ASoulLikeCharacter::CheckCameraLoc(float dt)
 	FVector NewOffset = FMath::VInterpTo(CameraBoom->SocketOffset, DesiredOffset, dt, 5.0f);
 	CameraBoom->SocketOffset = NewOffset;
 	FollowCamera->SetRelativeRotation(NewRotator);
+}
+
+void ASoulLikeCharacter::TickStaminaLogic(float dt)
+{
+	if (CurrentStamina >= MaxStamina) {
+		CurrentStamina = MaxStamina;
+		return;
+	}
+
+	CurrentStamina += StaminaRecoveryRate * dt;
+}
+
+void ASoulLikeCharacter::TickHpLogic(float dt)
+{
+
+}
+
+FVector ASoulLikeCharacter::GetProjecticleDirection(float RayDistance)
+{
+	FHitResult HitResult;
+	FVector StartLocation = FollowCamera->GetComponentLocation();
+	FVector EndLocation = StartLocation + (FollowCamera->GetForwardVector() * RayDistance);
+
+	// 캐릭터는 무시하기 위한 Collision Query Params 설정
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	// 레이캐스팅 실행
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, QueryParams);
+
+	if (bHit)
+	{
+		// 레이가 무언가에 맞았다면, 그 위치로 발사체를 발사
+		FVector ShootDirection = (HitResult.ImpactPoint - GetMesh()->GetSocketLocation(FName(TEXT("FX_GUN_MUZZLE")))).GetSafeNormal();
+		return ShootDirection;
+	}
+	else {
+		return (EndLocation - GetMesh()->GetSocketLocation(FName(TEXT("FX_GUN_MUZZLE")))).GetSafeNormal();
+	}
+	return FVector();
 }
 
 
@@ -119,7 +164,7 @@ void ASoulLikeCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Started, this, &ASoulLikeCharacter::Escape);
 
-		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &ASoulLikeCharacter::Aim);
+		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &ASoulLikeCharacter::Aim);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ASoulLikeCharacter::AimOff);
 	
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ASoulLikeCharacter::Reload);
@@ -170,20 +215,39 @@ void ASoulLikeCharacter::Look(const FInputActionValue& Value)
 
 void ASoulLikeCharacter::Fire(const FInputActionValue& Value)
 {
-	if (isReloading)return;
-	if(CurrentBulletCnt > 0)
+	if (isReloading || !IsAiming)return;
+	if(CurrentBulletCnt > 0 && CurrentStamina > FireStaminaCost)
 	{
-		//There are bullets to shoot
+
 		IsAttacking = true;
-		//1)FireAnimation Montage Play
+
 		if (FireAnimMontage) {
 			PlayAnimMontage(FireAnimMontage);
 		}
+
 		CurrentBulletCnt--;
+		CurrentStamina -= FireStaminaCost;
+		if (CurrentStamina <= 0)CurrentStamina = 0.f;
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		AProjecticle* FiredObj =
+			GetWorld()->SpawnActor<AProjecticle>(ProjecticleClass,
+			GetMesh()->GetSocketLocation(FName(TEXT("FX_GUN_MUZZLE"))) + FollowCamera->GetForwardVector() * 15.f,
+			GetActorRotation(), SpawnParams);
+
+
+		FiredObj->FireInDirection(
+			GetProjecticleDirection(FiredObj->ProjectileMovement->InitialSpeed * FiredObj->GetLifeSpan()),
+			this);
+
+	}
+	else if (CurrentStamina < FireStaminaCost)
+	{
+		//There is no Stamina
+
 	}
 	else {
-		// no bullets
-
 		//PlaySound Effects Empty
 		if (EmptyBulletSound) {
 			UGameplayStatics::PlaySoundAtLocation(this, EmptyBulletSound, GetActorLocation());
@@ -209,12 +273,14 @@ void ASoulLikeCharacter::Escape(const FInputActionValue& Value)
 
 void ASoulLikeCharacter::Aim(const FInputActionValue& Value)
 {
+	StaminaRecoveryRate -= AimStaminaCost;
 	IsAiming = true;
 	bUseControllerRotationYaw = true;
 }
 
 void ASoulLikeCharacter::AimOff(const FInputActionValue& Value)
 {
+	StaminaRecoveryRate += AimStaminaCost;
 	IsAiming = false;
 	bUseControllerRotationYaw = false;
 }
@@ -235,7 +301,7 @@ float ASoulLikeCharacter::CalculateDotProduct() const
 
 void ASoulLikeCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnMontageEnded"));
+
 	if (Montage == FireAnimMontage)
 	{
 		IsAttacking = false;
@@ -246,5 +312,3 @@ void ASoulLikeCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		CurrentBulletCnt = 4;
 	}
 }
-
-

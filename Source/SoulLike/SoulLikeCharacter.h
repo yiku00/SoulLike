@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Projecticle.h"
 #include "SoulLikeCharacter.generated.h"
 
 
@@ -64,6 +65,13 @@ class ASoulLikeCharacter : public ACharacter
 	UPROPERTY()
 	bool IsAttacking;
 
+	float CurrentHp;
+	float MaxHp;
+	float CurrentStamina;
+	float MaxStamina;
+	float StaminaRecoveryRate;
+	float FireStaminaCost;
+	float AimStaminaCost;
 	FVector AimingCameraLocation = FVector(290,70,90);
 	FRotator AimingCameraRotation = FRotator(0, 0, 0);
 
@@ -88,8 +96,14 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase* EmptyBulletSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<AProjecticle> ProjecticleClass;
 private:
 	void CheckCameraLoc(float dt);
+	void TickStaminaLogic(float dt);
+	void TickHpLogic(float dt);
+	FVector GetProjecticleDirection(float RayDistance);
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -122,11 +136,15 @@ protected:
 
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	float GetCurrentHp() { return CurrentHp; } 
+	float GetCurrentStamina() { return CurrentStamina; }
+	float GetMaxHp() { return MaxHp; }
+	float GetMaxStamina() { return MaxStamina; }
+	int GetCurrentBullet() { return CurrentBulletCnt; }
 };
 
