@@ -10,6 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include <Kismet/GameplayStatics.h>
+#include "GameManager.h"
+#include "Blueprint/UserWidget.h"
+#include "MainHUDCpp.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASoulLikeCharacter
@@ -18,7 +21,8 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MainCharacter"));
+	GetMesh()->SetCollisionProfileName(TEXT("MainCharacterMesh"));
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -47,6 +51,16 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	//Load Player Data
+	CurrentBulletCnt = 4;
+	MaxBulletCnt = 4;
+	MaxHp = 100;
+	CurrentHp = 100;
+	MaxStamina = 120;
+	CurrentStamina = 120;
+	StaminaRecoveryRate = 20.f;
+	AimStaminaCost = 15.f;
+	FireStaminaCost = 30.f;
 }
 
 void ASoulLikeCharacter::BeginPlay()
@@ -66,17 +80,23 @@ void ASoulLikeCharacter::BeginPlay()
 	if (GetMesh() && GetMesh()->GetAnimInstance())
 	{
 		GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ASoulLikeCharacter::OnMontageEnded);
+		GetMesh()->GetAnimInstance()->OnPlayMontageNotifyBegin.AddDynamic(this, &ASoulLikeCharacter::OnAnimationNotify);
 	}
 
-	//Load Player Data
-	CurrentBulletCnt = 4;
-	MaxHp = 100;
-	CurrentHp = 100;
-	MaxStamina = 120;
-	CurrentStamina = 120;
-	StaminaRecoveryRate = 20.f;
-	AimStaminaCost = 15.f;
-	FireStaminaCost = 30.f;
+	//게임매니저 초기화
+	UGameManager::GetInstance();
+
+	// HUD위젯생성
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController(); // 적절한 플레이어 컨트롤러 참조를 가져옵니다.
+	if (PlayerController && BlueprintWidgetClass)
+	{
+		UUserWidget* MyWidget = CreateWidget<UUserWidget>(PlayerController, BlueprintWidgetClass);
+
+		if (MyWidget)
+		{
+			MyWidget->AddToViewport(); // 위젯을 뷰포트에 추가합니다.
+		}
+	}
 }
 
 void ASoulLikeCharacter::Tick(float delta)
@@ -241,6 +261,9 @@ void ASoulLikeCharacter::Fire(const FInputActionValue& Value)
 			GetProjecticleDirection(FiredObj->ProjectileMovement->InitialSpeed * FiredObj->GetLifeSpan()),
 			this);
 
+		//반동구현
+		AddControllerYawInput(UGameManager::GetInstance()->GetRandomFloatInRange(-1.f,1.f));
+		AddControllerPitchInput(UGameManager::GetInstance()->GetRandomFloatInRange(-2.f,0.f));
 	}
 	else if (CurrentStamina < FireStaminaCost)
 	{
@@ -258,10 +281,11 @@ void ASoulLikeCharacter::Fire(const FInputActionValue& Value)
 void ASoulLikeCharacter::Reload(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Reload"));
-	if (CurrentBulletCnt == 4)return;
+	if (CurrentBulletCnt == MaxBulletCnt)return;
 	isReloading = true;
 	if (ReloadAnimMontageLong) {
 		PlayAnimMontage(ReloadAnimMontageLong);
+		OnReloadNotify.Broadcast();
 	}
 	
 }
@@ -269,6 +293,11 @@ void ASoulLikeCharacter::Reload(const FInputActionValue& Value)
 void ASoulLikeCharacter::Escape(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Escape"));
+	if (DodgeAnimation)
+		PlayAnimMontage(DodgeAnimation);
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.1f); // 10%의 속도로 시간이 흐른다
+	CustomTimeDilation = 10.0f; // 플레이어는 원래 속도로 움직인다
 }
 
 void ASoulLikeCharacter::Aim(const FInputActionValue& Value)
@@ -309,6 +338,19 @@ void ASoulLikeCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	else if (Montage == ReloadAnimMontageLong)
 	{
 		isReloading = false;
-		CurrentBulletCnt = 4;
+		CurrentBulletCnt = MaxBulletCnt;
+	}
+	else if (Montage == DodgeAnimation) {
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f); // 원래 속도로 시간이 흐른다
+		CustomTimeDilation = 1.0f; // 플레이어도 원래 속도로 움직인다
+	}
+}
+
+void ASoulLikeCharacter::OnAnimationNotify(FName NotifyName, const FBranchingPointNotifyPayload& Payload)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnAnimationNotify: %s"), NotifyName);
+	if (NotifyName == "YourNotifyName")
+	{
+		
 	}
 }

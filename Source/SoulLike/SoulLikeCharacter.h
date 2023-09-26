@@ -8,7 +8,7 @@
 #include "Projecticle.h"
 #include "SoulLikeCharacter.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReloadNotifyDelegateForMainUI);
 UCLASS(config=Game)
 class ASoulLikeCharacter : public ACharacter
 {
@@ -95,36 +95,37 @@ public:
 	UAnimMontage* ReloadAnimMontageShort;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* DodgeAnimation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase* EmptyBulletSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
 	TSubclassOf<AProjecticle> ProjecticleClass;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnReloadNotifyDelegateForMainUI OnReloadNotify;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UMainHUDCpp> BlueprintWidgetClass;
 private:
 	void CheckCameraLoc(float dt);
 	void TickStaminaLogic(float dt);
 	void TickHpLogic(float dt);
 	FVector GetProjecticleDirection(float RayDistance);
 protected:
-	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-	// To add mapping context
 	virtual void BeginPlay();
-
 	virtual void Tick(float delta) override;
+	UFUNCTION()
+	virtual void OnAnimationNotify(FName NotifyName, const FBranchingPointNotifyPayload& Payload);
 
-	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
-
-	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-
 	void Fire(const FInputActionValue& Value);
-
 	void Reload(const FInputActionValue& Value);
-
 	void Escape(const FInputActionValue& Value);
-
 	void Aim(const FInputActionValue& Value);
 	void AimOff(const FInputActionValue& Value);
 
@@ -145,6 +146,10 @@ public:
 	float GetCurrentStamina() { return CurrentStamina; }
 	float GetMaxHp() { return MaxHp; }
 	float GetMaxStamina() { return MaxStamina; }
+
+	UFUNCTION(BlueprintCallable)
 	int GetCurrentBullet() { return CurrentBulletCnt; }
+	UFUNCTION(BlueprintCallable)
+	int GetMaxBullet() { return MaxBulletCnt; }
 };
 

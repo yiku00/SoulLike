@@ -17,7 +17,7 @@ AProjecticle::AProjecticle()
     ProjectileSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProjectileSphere"));
     RootComponent = ProjectileSphere;
     ProjectileSphere->InitSphereRadius(5.0f);
-    ProjectileSphere->SetCollisionProfileName(TEXT("BlockAll"));
+    ProjectileSphere->SetCollisionProfileName(TEXT("MainProjecticle"));
 
     // Create a projectile movement component
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
@@ -77,7 +77,8 @@ void AProjecticle::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AProjecticle::OnBulletHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
     UParticleSystem* SelectedEffect = nullptr;
-    if (OtherActor == SpawnerRef)return;
+    if (OtherActor == SpawnerRef)
+        return;
     UE_LOG(LogTemp, Warning, TEXT("OnBulletHit"));
     if (OtherActor && (OtherActor->IsA(APawn::StaticClass()) || OtherActor->IsA(ACharacter::StaticClass())))
     {
@@ -86,8 +87,8 @@ void AProjecticle::OnBulletHit(UPrimitiveComponent* HitComponent, AActor* OtherA
     }
     else if (OtherComp && OtherComp->IsA(UStaticMeshComponent::StaticClass()))
     {
-        SelectedEffect = NoHitAsset;
-        UE_LOG(LogTemp, Warning, TEXT("NoHitAsset"));
+        SelectedEffect = HitWorldAsset;
+        UE_LOG(LogTemp, Warning, TEXT("HitWorldAsset"));
     }
     else {
         SelectedEffect = NoHitAsset;
