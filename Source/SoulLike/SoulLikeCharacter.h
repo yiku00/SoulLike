@@ -72,6 +72,7 @@ class ASoulLikeCharacter : public ACharacter
 	float StaminaRecoveryRate;
 	float FireStaminaCost;
 	float AimStaminaCost;
+	float EscapeStaminaBonus;
 	FVector AimingCameraLocation = FVector(290,70,90);
 	FRotator AimingCameraRotation = FRotator(0, 0, 0);
 

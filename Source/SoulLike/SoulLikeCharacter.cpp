@@ -61,6 +61,7 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 	StaminaRecoveryRate = 20.f;
 	AimStaminaCost = 15.f;
 	FireStaminaCost = 30.f;
+	EscapeStaminaBonus = 50.f;
 }
 
 void ASoulLikeCharacter::BeginPlay()
@@ -262,8 +263,8 @@ void ASoulLikeCharacter::Fire(const FInputActionValue& Value)
 			this);
 
 		//반동구현
-		AddControllerYawInput(UGameManager::GetInstance()->GetRandomFloatInRange(-1.f,1.f));
-		AddControllerPitchInput(UGameManager::GetInstance()->GetRandomFloatInRange(-2.f,0.f));
+		AddControllerYawInput(UGameManager::GetInstance()->GetRandomFloatInRange(-5.f,5.f)); //좌우
+		AddControllerPitchInput(UGameManager::GetInstance()->GetRandomFloatInRange(-10.f,-5.f)); //상
 	}
 	else if (CurrentStamina < FireStaminaCost)
 	{
@@ -298,6 +299,8 @@ void ASoulLikeCharacter::Escape(const FInputActionValue& Value)
 
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.1f); // 10%의 속도로 시간이 흐른다
 	CustomTimeDilation = 10.0f; // 플레이어는 원래 속도로 움직인다
+	GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed * 2;
+	StaminaRecoveryRate += EscapeStaminaBonus;
 }
 
 void ASoulLikeCharacter::Aim(const FInputActionValue& Value)
@@ -343,6 +346,8 @@ void ASoulLikeCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	else if (Montage == DodgeAnimation) {
 		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f); // 원래 속도로 시간이 흐른다
 		CustomTimeDilation = 1.0f; // 플레이어도 원래 속도로 움직인다
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed / 2;
+		StaminaRecoveryRate -= EscapeStaminaBonus;
 	}
 }
 
