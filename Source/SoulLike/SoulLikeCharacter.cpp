@@ -13,9 +13,13 @@
 #include "GameManager.h"
 #include "Blueprint/UserWidget.h"
 #include "MainHUDCpp.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Projecticle.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
-// ASoulLikeCharacter
+// ASoulLikeCharacter 
 
 ASoulLikeCharacter::ASoulLikeCharacter()
 {
@@ -51,17 +55,45 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	NSComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ParticleSystem"));
+	NSComponent->SetupAttachment(GetMesh());
+	NSComponent->bAutoActivate = false;
+
 	//Load Player Data
-	CurrentBulletCnt = 4;
-	MaxBulletCnt = 4;
-	MaxHp = 100;
-	CurrentHp = 100;
-	MaxStamina = 120;
-	CurrentStamina = 120;
-	StaminaRecoveryRate = 20.f;
-	AimStaminaCost = 15.f;
-	FireStaminaCost = 30.f;
-	EscapeStaminaBonus = 50.f;
+	static ConstructorHelpers::FObjectFinder<UDataTable> PlayerDataTableAsset(TEXT("DataTable'/Game/DataTable/RevanantData.RevanantData'"));
+	if (PlayerDataTableAsset.Succeeded())
+	{
+		UDataTable* PlayerDataTable = PlayerDataTableAsset.Object;
+
+		FPlayerData* PlayerDataRow = PlayerDataTable->FindRow<FPlayerData>(FName(TEXT("Default")), FString());
+		if (PlayerDataRow)
+		{
+			CurrentBulletCnt = PlayerDataRow->GetCurrentBulletCnt();
+			MaxBulletCnt = PlayerDataRow->GetMaxBulletCnt();
+			MaxHp = PlayerDataRow->GetMaxHp();
+			CurrentHp = PlayerDataRow->GetCurrentHp();
+			MaxStamina = PlayerDataRow->GetMaxStamina();
+			CurrentStamina = PlayerDataRow->GetCurrentStamina();
+			StaminaRecoveryRate = PlayerDataRow->GetStaminaRecoveryRate();
+			AimStaminaCost = PlayerDataRow->GetAimStaminaCost();
+			FireStaminaCost = PlayerDataRow->GetFireStaminaCost();
+			EscapeStaminaBonus = PlayerDataRow->GetEscapeStaminaBonus();
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("UDataTable Load Fail"));
+		CurrentBulletCnt = 4;
+		MaxBulletCnt = 4;
+		MaxHp = 100;
+		CurrentHp = 100;
+		MaxStamina = 120;
+		CurrentStamina = 120;
+		StaminaRecoveryRate = 20.f;
+		AimStaminaCost = 15.f;
+		FireStaminaCost = 30.f;
+		EscapeStaminaBonus = 50.f;
+	}
+
 }
 
 void ASoulLikeCharacter::BeginPlay()
@@ -98,6 +130,10 @@ void ASoulLikeCharacter::BeginPlay()
 			MyWidget->AddToViewport(); // 위젯을 뷰포트에 추가합니다.
 		}
 	}
+
+	//애셋 로드
+	if (EscapeParticle)
+		NSComponent->SetAsset(EscapeParticle);
 }
 
 void ASoulLikeCharacter::Tick(float delta)
@@ -250,12 +286,10 @@ void ASoulLikeCharacter::Fire(const FInputActionValue& Value)
 		CurrentStamina -= FireStaminaCost;
 		if (CurrentStamina <= 0)CurrentStamina = 0.f;
 
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		AProjecticle* FiredObj =
 			GetWorld()->SpawnActor<AProjecticle>(ProjecticleClass,
 			GetMesh()->GetSocketLocation(FName(TEXT("FX_GUN_MUZZLE"))) + FollowCamera->GetForwardVector() * 15.f,
-			GetActorRotation(), SpawnParams);
+			GetActorRotation());
 
 
 		FiredObj->FireInDirection(
@@ -301,6 +335,8 @@ void ASoulLikeCharacter::Escape(const FInputActionValue& Value)
 	CustomTimeDilation = 10.0f; // 플레이어는 원래 속도로 움직인다
 	GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed * 2;
 	StaminaRecoveryRate += EscapeStaminaBonus;
+	NSComponent->Activate();
+	NSComponent->SetCustomTimeDilation(2.0f);
 }
 
 void ASoulLikeCharacter::Aim(const FInputActionValue& Value)
@@ -348,6 +384,7 @@ void ASoulLikeCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		CustomTimeDilation = 1.0f; // 플레이어도 원래 속도로 움직인다
 		GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed / 2;
 		StaminaRecoveryRate -= EscapeStaminaBonus;
+		NSComponent->Deactivate();
 	}
 }
 

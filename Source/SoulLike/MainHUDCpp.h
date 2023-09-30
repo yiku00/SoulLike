@@ -3,8 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "SoulLikeCharacter.h"
+#include <Blueprint/UserWidget.h>
 #include "MainHUDCpp.generated.h"
 
 /**
@@ -15,10 +14,13 @@ class SOULLIKE_API UMainHUDCpp : public UUserWidget
 {
 	GENERATED_BODY()
 private:
-	ASoulLikeCharacter* OwningPawn;
+	class ASoulLikeCharacter* OwningPawn;
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
-	UWidgetAnimation* RevolverImage_SPin;
+	class UWidgetAnimation* RevolverImage_SPin;
+
+	UPROPERTY(meta = (BindWidget), Transient)
+	class UImage* CrossHair;
 private:
 	UFUNCTION(BlueprintCallable)
 	float GetOwningHp();
@@ -34,6 +36,7 @@ private:
 protected:
 	virtual void NativeConstruct();
 	virtual void BeginDestroy();
+	virtual void NativeTick(const FGeometry& MyGeometry,float dt);
 public:
 
 };

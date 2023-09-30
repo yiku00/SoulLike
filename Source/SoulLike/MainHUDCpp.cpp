@@ -3,6 +3,7 @@
 
 #include "MainHUDCpp.h"
 #include "SoulLikeCharacter.h"
+#include "Components/Image.h"
 
 float UMainHUDCpp::GetOwningHp()
 {
@@ -44,6 +45,15 @@ void UMainHUDCpp::BeginDestroy()
 	if (OwningPawn)
 	{
 		OwningPawn->OnReloadNotify.RemoveDynamic(this, &UMainHUDCpp::PlaySpinAnim);
+	}
+}
+
+void UMainHUDCpp::NativeTick(const FGeometry& MyGeometry,float dt)
+{
+	Super::NativeTick(MyGeometry,dt);
+	ESlateVisibility DesiredVisibility = OwningPawn->IsAiming ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	if (CrossHair->GetVisibility() != DesiredVisibility) {
+		CrossHair->SetVisibility(DesiredVisibility);
 	}
 }
 
