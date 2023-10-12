@@ -6,9 +6,12 @@
 #include "UObject/NoExportTypes.h"
 #include "GameManager.generated.h"
 
+#define DT_PATH "/Game/DataTable/"
+
 /**
  * 
  */
+
 UCLASS()
 class SOULLIKE_API UGameManager : public UObject
 {
