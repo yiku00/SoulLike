@@ -19,9 +19,7 @@ public:
 
 	UFUNCTION()
 	virtual void UpdateCurrentBullet(const uint32 NewBullet); //This should be called by dellegate
-	
-	//this function will be desinged temporary but it seems not be used
-	//virtual void UpdateMaxBullet(const uint32 NewBullet); 
+	virtual void UpdateMaxBullet(const uint32 NewBullet);  //This should be called by dellegate
 protected:
 	virtual void NativeConstruct();
 

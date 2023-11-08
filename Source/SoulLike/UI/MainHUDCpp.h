@@ -15,6 +15,8 @@ class SOULLIKE_API UMainHUDCpp : public UUserWidget
 	GENERATED_BODY()
 
 private:
+
+protected:
 	float OwnersMaxHp;
 	float OwnersMaxMp;
 	float OwnersMaxStamina;
@@ -27,9 +29,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> StaminaProgressBar;
-
-	UPROPERTY()
-	TObjectPtr<class UBulletWidget> BulletUI;
 
 public:
 	UFUNCTION()

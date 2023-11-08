@@ -20,12 +20,12 @@ void UBulletWidget::UpdateCurrentBullet(const uint32 NewBullet)
 	CurrentBulletTextBlock->SetText(FText::FromString(FString::FromInt(CurrentBulletAmount)));
 }
 
-//void UBulletWidget::UpdateMaxBullet(const uint32 NewBullet)
-//{
-//	MaxBulletAmount = NewBullet;
-//
-//	CurrentBulletTextBlock->SetText(FText::FromString(FString::FromInt(MaxBulletAmount)));
-//}
+void UBulletWidget::UpdateMaxBullet(const uint32 NewBullet)
+{
+	MaxBulletAmount = NewBullet;
+
+	CurrentBulletTextBlock->SetText(FText::FromString(FString::FromInt(MaxBulletAmount)));
+}
 
 void UBulletWidget::NativeConstruct()
 {

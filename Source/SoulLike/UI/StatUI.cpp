@@ -2,7 +2,7 @@
 
 
 #include "StatUI.h"
-#include "Character/CharacterStatManager.h"
+#include "CharacterStat/CharacterStatManager.h"
 #include "Character/SoulLikeCharacter.h"
 #include "Components/ProgressBar.h"
 #include <Components/CanvasPanelSlot.h>

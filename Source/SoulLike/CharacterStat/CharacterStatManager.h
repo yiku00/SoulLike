@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GameData/CharacterDataStructures.h"
+#include "CharacterStat/CharacterDataStructures.h"
 #include "CharacterStatManager.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpUpdated,float)
@@ -28,6 +28,8 @@ public:
 	FORCEINLINE const float GetCurrentHp() { return CurrentHp; }
 	FORCEINLINE const float GetCurrentMp() { return CurrentMp; }
 	FORCEINLINE const float GetCurrentStamina() { return CurrentStamina; }
+	FORCEINLINE const float GetMaxBullet() { return GunFighterData.MaxBulletCnt; }
+	FORCEINLINE const float GetCurrentBullet() { return CurrentBulletCnt; }
 protected:
 	// Essential virtual Function
 	virtual void BeginPlay() override;
@@ -39,6 +41,7 @@ private:
 	FORCEINLINE void SetMp(float NewMp) { CurrentMp = NewMp; OnMpUpdatedDelegate.Broadcast(CurrentMp);}
 	FORCEINLINE void SetStamina(float NewStamina) { CurrentStamina = NewStamina; OnStaminaUpdatedDelegate.Broadcast(CurrentStamina);}
 	FORCEINLINE void SetCurrentBullet(uint32 NewCnt) { CurrentBulletCnt = NewCnt; OnCurrentBulletUpdated.Broadcast(CurrentBulletCnt); }
+
 public:
 	//these delegate should be connected in Character's class
 	FOnHpUpdated OnHpUpdatedDelegate;

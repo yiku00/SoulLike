@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "UI/MainHUDCpp.h"
 #include "SoulLikePlayerController.generated.h"
 
 /**
@@ -22,9 +23,12 @@ class SOULLIKE_API ASoulLikePlayerController : public APlayerController
 {
 	GENERATED_BODY()
 public:
-	//InitHUD(const TSubclassOf<class MainHUDCpp> HUDClass);
+	FORCEINLINE void SetHUDClass(TSubclassOf< UMainHUDCpp> InHUDClass) { HUDClass = InHUDClass; };
 protected:
 	virtual void BeginPlay() override;
 private:
+	UPROPERTY()
+	UMainHUDCpp* MainHUD;
+	TSubclassOf<UMainHUDCpp> HUDClass;
 
 };

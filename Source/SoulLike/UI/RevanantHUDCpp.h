@@ -3,15 +3,37 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UI/MainHUDCpp.h"
+#include "GunFighterHUD.h"
 #include "RevanantHUDCpp.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SOULLIKE_API URevanantHUDCpp : public UMainHUDCpp
+class SOULLIKE_API URevanantHUDCpp : public UGunFighterHUD
 {
 	GENERATED_BODY()
+	
+	//Function Section
+public:
+
+protected:
+	virtual void NativeConstruct() override;
+	virtual void BeginDestroy()override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float dt) override;
+
+private:
+
+
+
+
+	//Variable Section
+public:
+
+protected:
+
+private:
+
+
 	
 };

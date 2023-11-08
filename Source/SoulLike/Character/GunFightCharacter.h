@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SoulLikeCharacter.h"
+#include "Interface/GunFighterInterface.h"
 #include "GunFightCharacter.generated.h"
 
 /**
@@ -11,7 +12,7 @@
  */
 
 UCLASS()
-class SOULLIKE_API AGunFightCharacter : public ASoulLikeCharacter
+class SOULLIKE_API AGunFightCharacter : public ASoulLikeCharacter, public IGunFighterInterface
 {
 	GENERATED_BODY()
 public:
@@ -31,6 +32,7 @@ protected:
 	virtual void Reload(const FInputActionValue& Value);
 	virtual void CheckCameraLoc(float dt);
 	virtual void Tick(float delta) override;
+	virtual void SetUpGunFightHUD(class UGunFighterHUD* WidgetPtr) override;
 private:
 
 	

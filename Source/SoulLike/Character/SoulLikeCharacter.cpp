@@ -7,7 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "CharacterStatManager.h"
+#include "CharacterStat/CharacterStatManager.h"
 #include "UI/MainHUDCpp.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -54,10 +54,10 @@ ASoulLikeCharacter::ASoulLikeCharacter()
 
 void ASoulLikeCharacter::InitStatUI()
 {
-	if (BlueprintWidgetClass)
+	if (HUDClass)
 	{
 		APlayerController* OwnerController = Cast<APlayerController>(GetController());
-		UMainHUDCpp* MyWidget = CreateWidget<UMainHUDCpp>(OwnerController, BlueprintWidgetClass);
+		UMainHUDCpp* MyWidget = CreateWidget<UMainHUDCpp>(OwnerController, HUDClass);
 		if (MyWidget)
 		{
 			MyWidget->AddToViewport(); 
@@ -115,7 +115,7 @@ void ASoulLikeCharacter::BeginPlay()
 	StatManager->LoadCharacterData(CharacterName);
 
 	//Create Stat Data Widget
-	InitStatUI();
+	//InitStatUI();
 }
 
 void ASoulLikeCharacter::Tick(float delta)
@@ -202,6 +202,24 @@ void ASoulLikeCharacter::Escape(const FInputActionValue& Value)
 	//StaminaRecoveryRate += EscapeStaminaBonus;
 	//NSComponent->Activate();
 	//NSComponent->SetCustomTimeDilation(2.0f);
+}
+
+void ASoulLikeCharacter::SetUpEssentialHUD(UMainHUDCpp* WidgetPtr)
+{
+	//if WidgetPtr is valid, Add Function to StatData's Delegate, 
+	// and will be connected Character's Essential Data to UI
+
+	WidgetPtr->SetMaxHp(StatManager->GetMaxHp());
+	WidgetPtr->SetMaxMp(StatManager->GetMaxMp());
+	WidgetPtr->SetMaxStamina(StatManager->GetMaxStamina());
+
+	WidgetPtr->UpdateHpPercentage(StatManager->GetCurrentHp());
+	WidgetPtr->UpdateMpPercentage(StatManager->GetCurrentMp());
+	WidgetPtr->UpdateStaminaPercentage(StatManager->GetCurrentStamina());
+
+	StatManager->OnHpUpdatedDelegate.AddUObject(WidgetPtr, &UMainHUDCpp::UpdateHpPercentage);
+	StatManager->OnMpUpdatedDelegate.AddUObject(WidgetPtr, &UMainHUDCpp::UpdateMpPercentage);
+	StatManager->OnStaminaUpdatedDelegate.AddUObject(WidgetPtr, &UMainHUDCpp::UpdateStaminaPercentage);
 }
 
 FVector ASoulLikeCharacter::CalculateCrossProduct() const

@@ -2,13 +2,14 @@
 
 
 #include "GunFightCharacter.h"
-#include "CharacterStatManager.h"
+#include "CharacterStat/CharacterStatManager.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "UI/GunFighterHUD.h"
 
 AGunFightCharacter::AGunFightCharacter()
 {
-
+	
 }
 
 FVector AGunFightCharacter::GetProjecticleDirection(float RayDistance)
@@ -70,4 +71,16 @@ void AGunFightCharacter::Tick(float delta)
 {
 	Super::Tick(delta);
 	CheckCameraLoc(delta);
+}
+
+void AGunFightCharacter::SetUpGunFightHUD(UGunFighterHUD* WidgetPtr)
+{
+	if (WidgetPtr)
+	{
+		WidgetPtr->UpdateMaxBulletCnt(StatManager->GetMaxBullet());
+		WidgetPtr->UpdateCurrentBulletCnt(StatManager->GetCurrentBullet());
+
+		StatManager->OnCurrentBulletUpdated.AddUObject(WidgetPtr, &UGunFighterHUD::UpdateCurrentBulletCnt);
+
+	}
 }

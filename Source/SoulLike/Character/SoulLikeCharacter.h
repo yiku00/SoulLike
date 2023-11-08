@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Interface/CharacterHUDInterface.h"
 #include "SoulLikeCharacter.generated.h"
 
 UCLASS(config=Game)
-class ASoulLikeCharacter : public ACharacter
+class ASoulLikeCharacter : public ACharacter, public ICharacterHUDInterface
 {
 	GENERATED_BODY()
 public:
@@ -27,7 +28,7 @@ protected: //Character Stat Section
 	TObjectPtr<class UCharacterStatManager> StatManager;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UMainHUDCpp> BlueprintWidgetClass;
+	TSubclassOf<class UMainHUDCpp> HUDClass;
 
 	FName CharacterName;
 protected:
@@ -72,7 +73,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 	virtual void EssentialAttack(const FInputActionValue& Value); 
 	virtual void Escape(const FInputActionValue& Value);
-
+	virtual void SetUpEssentialHUD(class UMainHUDCpp* WidgetPtr) override;
 
 	UFUNCTION(BlueprintCallable, Category = "VectorOperations")
 	FVector CalculateCrossProduct() const; //for animation blueprint

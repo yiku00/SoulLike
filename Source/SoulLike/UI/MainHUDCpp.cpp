@@ -2,11 +2,11 @@
 
 
 #include "MainHUDCpp.h"
-#include "Character/CharacterStatManager.h"
+#include "CharacterStat/CharacterStatManager.h"
 #include "Character/SoulLikeCharacter.h"
 #include "Components/ProgressBar.h"
 #include <Components/CanvasPanelSlot.h>
-#include "BulletWidget.h"
+#include "Interface/CharacterHUDInterface.h"
 
 void UMainHUDCpp::UpdateHpPercentage(const float NewHp)
 {
@@ -30,6 +30,7 @@ void UMainHUDCpp::SetMaxHp(const float NewHp)
 {
 	OwnersMaxHp = NewHp;
 
+	//Edit Progress Bar size Pretty
 	UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(HPProgressBar->Slot);
 	FVector2D NewSize = FVector2D(NewHp * 3, CanvasSlot->GetSize().Y);
 
@@ -74,9 +75,12 @@ void UMainHUDCpp::NativeConstruct()
 
 	StaminaProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("StaminaPB")));
 	ensure(StaminaProgressBar != nullptr);
-	
-	BulletUI = Cast<UBulletWidget>(GetWidgetFromName(TEXT("RevanantBulletUI")));
-	ensure(BulletUI != nullptr);
+
+	ICharacterHUDInterface* Interface = Cast<ICharacterHUDInterface>(GetOwningPlayer());
+	if (Interface)
+	{
+		Interface->SetUpEssentialHUD(this);
+	}
 }
 
 void UMainHUDCpp::BeginDestroy()

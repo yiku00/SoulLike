@@ -2,13 +2,14 @@
 
 
 #include "RevanantCpp.h"
-#include "CharacterStatManager.h"
+#include "CharacterStat/CharacterStatManager.h"
 #include <EnhancedInputComponent.h>
 #include <Kismet/GameplayStatics.h>
 #include "Prop/Projecticle.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "UI/StatUI.h"
+#include "Player/SoulLikePlayerController.h"
 
 ARevanantCpp::ARevanantCpp()
 {
@@ -26,13 +27,23 @@ ARevanantCpp::ARevanantCpp()
 		FVector(0, 0, 0),
 		FVector(1, 1, 1));
 
+	//Set Character's name
 	CharacterName = FName(TEXT("Revanant"));
 
+	//Get Revanant's HUD CLASS , need to set
 	ConstructorHelpers::FClassFinder<UUserWidget> StatWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/BPRevanantStatUI.BPRevanantStatUI_C'"));
 	if (StatWidgetClassRef.Succeeded())
 	{
-		BlueprintWidgetClass = StatWidgetClassRef.Class;
+		HUDClass = StatWidgetClassRef.Class;
 	}
+
+	//Send Request to Controller to set HUD Class, so when game begin, HUD Class Will be Constructed
+	ASoulLikePlayerController* PlayerController = Cast<ASoulLikePlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->SetHUDClass(HUDClass.Get());
+	}
+
 }
 
 void ARevanantCpp::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
