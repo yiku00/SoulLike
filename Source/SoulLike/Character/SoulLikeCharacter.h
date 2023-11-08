@@ -27,7 +27,7 @@ protected: //Character Stat Section
 	TObjectPtr<class UCharacterStatManager> StatManager;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UStatUI> BlueprintWidgetClass;
+	TSubclassOf<class UMainHUDCpp> BlueprintWidgetClass;
 
 	FName CharacterName;
 protected:

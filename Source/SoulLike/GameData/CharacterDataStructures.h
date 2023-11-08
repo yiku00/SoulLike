@@ -54,9 +54,6 @@ struct FGunFighterData : public FTableRowBase
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 CurrentBulletCnt;//Optimized
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MaxBulletCnt;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -65,13 +62,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float EscapeStaminaBonus;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ReloadSpeed;
 
 	FGunFighterData()
 	{
 		AimStaminaCost = 0.f;
 		EscapeStaminaBonus = 0.f;
 		MaxBulletCnt = 0;
-		CurrentBulletCnt = 0;
+		ReloadSpeed = 1.0;
 	}
 };

@@ -45,4 +45,6 @@ private:
 	void Aim(const FInputActionValue& Value) override;
 	void AimOff(const FInputActionValue& Value) override;
 	void Reload(const FInputActionValue& Value) override;
+
+	
 };

@@ -8,17 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "CharacterStatManager.h"
-#include "UI/StatUI.h"
-//#include "Components/InputComponent.h"
-//#include "GameFramework/Controller.h"
-//#include <Kismet/GameplayStatics.h>
-//#include "Game/GameManager.h"
-//#include "Blueprint/UserWidget.h"
-//#include "UI/MainHUDCpp.h"
-//#include "Particles/ParticleSystemComponent.h"
-//#include "Prop/Projecticle.h"
-//#include "NiagaraFunctionLibrary.h"
-//#include "NiagaraComponent.h"
+#include "UI/MainHUDCpp.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASoulLikeCharacter 
@@ -67,7 +57,7 @@ void ASoulLikeCharacter::InitStatUI()
 	if (BlueprintWidgetClass)
 	{
 		APlayerController* OwnerController = Cast<APlayerController>(GetController());
-		UStatUI* MyWidget = CreateWidget<UStatUI>(OwnerController, BlueprintWidgetClass);
+		UMainHUDCpp* MyWidget = CreateWidget<UMainHUDCpp>(OwnerController, BlueprintWidgetClass);
 		if (MyWidget)
 		{
 			MyWidget->AddToViewport(); 
@@ -80,9 +70,9 @@ void ASoulLikeCharacter::InitStatUI()
 		MyWidget->UpdateMpPercentage(StatManager->GetCurrentMp());
 		MyWidget->UpdateStaminaPercentage(StatManager->GetCurrentStamina());
 
-		StatManager->OnHpUpdatedDelegate.AddUObject(MyWidget, &UStatUI::UpdateHpPercentage);
-		StatManager->OnMpUpdatedDelegate.AddUObject(MyWidget, &UStatUI::UpdateMpPercentage);
-		StatManager->OnStaminaUpdatedDelegate.AddUObject(MyWidget, &UStatUI::UpdateStaminaPercentage);
+		StatManager->OnHpUpdatedDelegate.AddUObject(MyWidget, &UMainHUDCpp::UpdateHpPercentage);
+		StatManager->OnMpUpdatedDelegate.AddUObject(MyWidget, &UMainHUDCpp::UpdateMpPercentage);
+		StatManager->OnStaminaUpdatedDelegate.AddUObject(MyWidget, &UMainHUDCpp::UpdateStaminaPercentage);
 	}
 }
 

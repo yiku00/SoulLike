@@ -3,3 +3,7 @@
 
 #include "Player/SoulLikePlayerController.h"
 
+void ASoulLikePlayerController::BeginPlay()
+{
+
+}

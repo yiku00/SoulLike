@@ -72,3 +72,24 @@ void UCharacterStatManager::LoadCharacterData(FName CharacterName)
 
 
 }
+
+void UCharacterStatManager::LoadGunFighterCharacterData(FName CharacterName)
+{
+	UDataTable* GunFighterDataTableAsset = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, TEXT("/Script/Engine.DataTable'/Game/DataTable/DT_GunFighterStatData.DT_GunFighterStatData'")));
+	if (GunFighterDataTableAsset)
+	{
+		FGunFighterData* RowData = GunFighterDataTableAsset->FindRow<FGunFighterData>(CharacterName, FString());
+
+		if (RowData) {
+			GunFighterData = *RowData;
+			SetCurrentBullet(GunFighterData.MaxBulletCnt);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("CharacterData Load Fail"));
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("UDataTable Load Fail"));
+	}
+}

@@ -10,18 +10,12 @@
  * 
  */
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReloadNotifyDelegateForMainUI);
-
 UCLASS()
 class SOULLIKE_API AGunFightCharacter : public ASoulLikeCharacter
 {
 	GENERATED_BODY()
-
 public:
 	AGunFightCharacter();
-
-	UPROPERTY(BlueprintAssignable)
-	FOnReloadNotifyDelegateForMainUI OnReloadNotify;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool isReloading; 

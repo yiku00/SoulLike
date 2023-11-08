@@ -33,7 +33,7 @@ void URevanantStatUI::BeginDestroy()
 	Super::BeginDestroy();
 	if (OwnedRevanant)
 	{
-		OwnedRevanant->OnReloadNotify.RemoveDynamic(this, &URevanantStatUI::PlaySpinAnim);
+		
 	}
 }
 
