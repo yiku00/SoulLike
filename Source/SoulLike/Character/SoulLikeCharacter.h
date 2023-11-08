@@ -83,6 +83,9 @@ protected:
 
 	UFUNCTION()
 	virtual void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted); 
+
+	//This Method Make Statmanager to Load Charater's Essential Stat Data from Data Table
+	virtual void LoadCharacterData(FName InName);
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

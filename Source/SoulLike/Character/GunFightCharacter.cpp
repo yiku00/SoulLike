@@ -84,3 +84,9 @@ void AGunFightCharacter::SetUpGunFightHUD(UGunFighterHUD* WidgetPtr)
 
 	}
 }
+
+void AGunFightCharacter::LoadCharacterData(FName InName)
+{
+	Super::LoadCharacterData(InName);
+	StatManager->LoadGunFighterCharacterData(CharacterName);
+}

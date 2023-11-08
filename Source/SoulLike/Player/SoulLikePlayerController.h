@@ -23,7 +23,7 @@ class SOULLIKE_API ASoulLikePlayerController : public APlayerController
 {
 	GENERATED_BODY()
 public:
-	FORCEINLINE void SetHUDClass(TSubclassOf< UMainHUDCpp> InHUDClass) { HUDClass = InHUDClass; };
+	void SetHUDClass(TSubclassOf<UMainHUDCpp> InHUDClass);
 protected:
 	virtual void BeginPlay() override;
 private:

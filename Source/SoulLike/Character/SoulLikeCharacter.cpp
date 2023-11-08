@@ -110,18 +110,11 @@ void ASoulLikeCharacter::BeginPlay()
 	{
 		GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ASoulLikeCharacter::OnMontageEnded);
 	}
-
-	//Stat Data load
-	StatManager->LoadCharacterData(CharacterName);
-
-	//Create Stat Data Widget
-	//InitStatUI();
 }
 
 void ASoulLikeCharacter::Tick(float delta)
 {
 	Super::Tick(delta);
-	//CheckCameraLoc(delta);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -239,4 +232,10 @@ float ASoulLikeCharacter::CalculateDotProduct() const
 void ASoulLikeCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 
+}
+
+void ASoulLikeCharacter::LoadCharacterData(FName InName)
+{
+	//load Essential Stat Data 
+	StatManager->LoadCharacterData(CharacterName);
 }

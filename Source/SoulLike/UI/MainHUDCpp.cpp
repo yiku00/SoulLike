@@ -76,7 +76,7 @@ void UMainHUDCpp::NativeConstruct()
 	StaminaProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("StaminaPB")));
 	ensure(StaminaProgressBar != nullptr);
 
-	ICharacterHUDInterface* Interface = Cast<ICharacterHUDInterface>(GetOwningPlayer());
+	ICharacterHUDInterface* Interface = Cast<ICharacterHUDInterface>(GetOwningPlayerPawn());
 	if (Interface)
 	{
 		Interface->SetUpEssentialHUD(this);

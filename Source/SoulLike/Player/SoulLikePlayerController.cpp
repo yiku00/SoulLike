@@ -4,10 +4,13 @@
 #include "Player/SoulLikePlayerController.h"
 #include "UI/MainHUDCpp.h"
 
-void ASoulLikePlayerController::BeginPlay()
+
+
+void ASoulLikePlayerController::SetHUDClass(TSubclassOf<UMainHUDCpp> InHUDClass)
 {
+	HUDClass = InHUDClass;
 	// if HUDClass is valid, Create HUD And add UI to viewPort
-	if (HUDClass != nullptr) 
+	if (HUDClass != nullptr)
 	{
 		APlayerController* OwnerController = Cast<APlayerController>(this);
 		MainHUD = CreateWidget<UMainHUDCpp>(OwnerController, HUDClass.Get());
@@ -17,3 +20,11 @@ void ASoulLikePlayerController::BeginPlay()
 		}
 	}
 }
+
+void ASoulLikePlayerController::BeginPlay()
+{
+	
+}
+
+
+

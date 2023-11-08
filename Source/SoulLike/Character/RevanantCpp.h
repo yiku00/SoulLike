@@ -30,6 +30,7 @@ protected:
 	virtual void Tick(float delta) override;
 	virtual void CheckCameraLoc(float dt) override;
 	virtual void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	virtual void BeginPlay() override;
 private:
 	float FireStaminaCost;
 	float AimStaminaCost;

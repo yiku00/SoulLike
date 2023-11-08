@@ -7,9 +7,9 @@
 
 void UBulletWidget::PlayReloadAnim()
 {
-	if (ReloadAnim)
+	if (SpinAnim)
 	{
-		PlayAnimation(ReloadAnim);
+		PlayAnimation(SpinAnim);
 	}
 }
 
@@ -24,7 +24,7 @@ void UBulletWidget::UpdateMaxBullet(const uint32 NewBullet)
 {
 	MaxBulletAmount = NewBullet;
 
-	CurrentBulletTextBlock->SetText(FText::FromString(FString::FromInt(MaxBulletAmount)));
+	MaxBulletTextBlock->SetText(FText::FromString(FString::FromInt(MaxBulletAmount)));
 }
 
 void UBulletWidget::NativeConstruct()
@@ -37,6 +37,5 @@ void UBulletWidget::NativeConstruct()
 	MaxBulletTextBlock = Cast<UTextBlock>(GetWidgetFromName(TEXT("TxtMaxBullet")));
 	ensure(MaxBulletTextBlock != nullptr);
 
-	ReloadAnim = Cast<UWidgetAnimation>(GetWidgetFromName(TEXT("SpinAnim")));
-	ensure(ReloadAnim != nullptr);
+	ensure(SpinAnim != nullptr);
 }

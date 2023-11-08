@@ -17,7 +17,7 @@ void UGunFighterHUD::UpdateMaxBulletCnt(const uint32 NewCnt)
 {
 	if (BulletUI)
 	{
-
+		BulletUI->UpdateMaxBullet(NewCnt);
 	}
 }
 
@@ -29,7 +29,7 @@ void UGunFighterHUD::NativeConstruct()
 	ensure(BulletUI != nullptr);
 
 	//if Owner Pawn Has GunFighterInterface, Request Gunfight Data to Display
-	IGunFighterInterface* Interface = Cast<IGunFighterInterface>(GetOwningPlayer());
+	IGunFighterInterface* Interface = Cast<IGunFighterInterface>(GetOwningPlayerPawn());
 	if (Interface)
 	{
 		Interface->SetUpGunFightHUD(this);
@@ -38,9 +38,10 @@ void UGunFighterHUD::NativeConstruct()
 
 void UGunFighterHUD::BeginDestroy()
 {
+	Super::BeginDestroy();
 }
 
 void UGunFighterHUD::NativeTick(const FGeometry& MyGeometry, float dt)
 {
-
+	Super::NativeTick(MyGeometry, dt);
 }

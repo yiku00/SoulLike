@@ -20,8 +20,13 @@ public:
 	UFUNCTION()
 	virtual void UpdateCurrentBullet(const uint32 NewBullet); //This should be called by dellegate
 	virtual void UpdateMaxBullet(const uint32 NewBullet);  //This should be called by dellegate
+
 protected:
 	virtual void NativeConstruct();
+
+public:
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetAnim),Transient)
+	TObjectPtr<UWidgetAnimation> SpinAnim;
 
 private:
 	UPROPERTY()
@@ -29,9 +34,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> MaxBulletTextBlock;
-
-	UPROPERTY()
-	TObjectPtr<UWidgetAnimation> ReloadAnim;
 
 	UPROPERTY()
 	uint32 CurrentBulletAmount;

@@ -33,6 +33,7 @@ protected:
 	virtual void CheckCameraLoc(float dt);
 	virtual void Tick(float delta) override;
 	virtual void SetUpGunFightHUD(class UGunFighterHUD* WidgetPtr) override;
+	virtual void LoadCharacterData(FName InName) override;
 private:
 
 	

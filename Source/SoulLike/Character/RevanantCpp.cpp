@@ -8,7 +8,7 @@
 #include "Prop/Projecticle.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "UI/StatUI.h"
+#include "UI/GunFighterHUD.h"
 #include "Player/SoulLikePlayerController.h"
 
 ARevanantCpp::ARevanantCpp()
@@ -29,21 +29,14 @@ ARevanantCpp::ARevanantCpp()
 
 	//Set Character's name
 	CharacterName = FName(TEXT("Revanant"));
+	LoadCharacterData(CharacterName);
 
 	//Get Revanant's HUD CLASS , need to set
-	ConstructorHelpers::FClassFinder<UUserWidget> StatWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/BPRevanantStatUI.BPRevanantStatUI_C'"));
+	ConstructorHelpers::FClassFinder<UGunFighterHUD> StatWidgetClassRef(TEXT("/Game/UI/BPRevanantStatUI.BPRevanantStatUI_C"));
 	if (StatWidgetClassRef.Succeeded())
 	{
 		HUDClass = StatWidgetClassRef.Class;
 	}
-
-	//Send Request to Controller to set HUD Class, so when game begin, HUD Class Will be Constructed
-	ASoulLikePlayerController* PlayerController = Cast<ASoulLikePlayerController>(GetController());
-	if (PlayerController)
-	{
-		PlayerController->SetHUDClass(HUDClass.Get());
-	}
-
 }
 
 void ARevanantCpp::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -66,6 +59,18 @@ void ARevanantCpp::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	//	//StaminaRecoveryRate -= EscapeStaminaBonus;
 	//	//NSComponent->Deactivate();
 	//}
+}
+
+void ARevanantCpp::BeginPlay()
+{
+	Super::BeginPlay();
+	//Send Request to Controller to set HUD Class, so when game begin, HUD Class Will be Constructed
+
+	ASoulLikePlayerController* PlayerController = Cast<ASoulLikePlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->SetHUDClass(HUDClass);
+	}
 }
 
 void ARevanantCpp::Aim(const FInputActionValue& Value)
