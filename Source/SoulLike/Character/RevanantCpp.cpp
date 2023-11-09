@@ -10,6 +10,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "UI/GunFighterHUD.h"
 #include "Player/SoulLikePlayerController.h"
+#include "Skill/RevanantBasicAttack.h"
+#include "Skill/RevanantReloadSkill.h"
+#include "Camera/CameraComponent.h"
 
 ARevanantCpp::ARevanantCpp()
 {
@@ -29,10 +32,12 @@ ARevanantCpp::ARevanantCpp()
 
 	//Set Character's name
 	CharacterName = FName(TEXT("Revanant"));
+	MuzzleSocketName = FName(TEXT("FX_GUN_MUZZLE"));
+
 	LoadCharacterData(CharacterName);
 
 	//Get Revanant's HUD CLASS , need to set
-	ConstructorHelpers::FClassFinder<UGunFighterHUD> StatWidgetClassRef(TEXT("/Game/UI/BPRevanantStatUI.BPRevanantStatUI_C"));
+	static ConstructorHelpers::FClassFinder<UGunFighterHUD> StatWidgetClassRef(TEXT("/Game/UI/BPRevanantStatUI.BPRevanantStatUI_C"));
 	if (StatWidgetClassRef.Succeeded())
 	{
 		HUDClass = StatWidgetClassRef.Class;
@@ -73,6 +78,42 @@ void ARevanantCpp::BeginPlay()
 	}
 }
 
+void ARevanantCpp::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	BasicAttack = NewObject<URevanantBasicAttack>();
+	BasicAttack->Initialize(this);
+
+	ReloadSkill = NewObject<URevanantReloadSkill>();
+	ReloadSkill->Initialize(this);
+}
+
+FVector ARevanantCpp::GetPlayerAimingDirection()
+{
+	return FollowCamera->GetForwardVector();
+}
+
+FVector ARevanantCpp::GetCameraLocation()
+{
+	return FollowCamera->GetComponentLocation();
+}
+
+FRotator ARevanantCpp::GetPawnRotation()
+{
+	return GetActorRotation();
+}
+
+void ARevanantCpp::PlayMontageFromSkill(UAnimMontage* AnimMontage)
+{
+	PlayAnimMontage(AnimMontage);
+}
+
+void ARevanantCpp::FillBulletMax()
+{
+	StatManager->SetCurrentBullet(StatManager->GetMaxBullet());
+}
+
 void ARevanantCpp::Aim(const FInputActionValue& Value)
 {
 	Super::Aim(Value);
@@ -97,44 +138,15 @@ void ARevanantCpp::Reload(const FInputActionValue& Value)
 	//	PlayAnimMontage(MontageData.ReloadAnimMontage[0]);
 	//	OnReloadNotify.Broadcast();
 	//}
+	ReloadSkill->Execute();
 }
 
 void ARevanantCpp::Attack(const FInputActionValue& Value)
 {
-	//if (isReloading || !IsAiming)return;
-	//if (CurrentBulletCnt > 0 && StatManager->GetStatData()->CurrentStamina > FireStaminaCost)
-	//{
-
-	//	IsAttacking = true;
-
-	//	if (MontageData.EssentialAttackMontage.Num() != 0) {
-	//		PlayAnimMontage(MontageData.EssentialAttackMontage[0]);
-	//	}
-
-	//	CurrentBulletCnt--;
-	//	StatManager->CostStamina(FireStaminaCost);
-
-	//	AProjecticle* FiredObj =
-	//		GetWorld()->SpawnActor<AProjecticle>(ProjecticleClass,
-	//			GetMesh()->GetSocketLocation(FName(TEXT("FX_GUN_MUZZLE"))) + FollowCamera->GetForwardVector() * 15.f,
-	//			GetActorRotation());
-
-
-	//	FiredObj->FireInDirection(
-	//		GetProjecticleDirection(FiredObj->ProjectileMovement->InitialSpeed * FiredObj->GetLifeSpan()),
-	//		this);
-	//}
-	//else if (StatManager->GetStatData()->CurrentStamina < FireStaminaCost)
-	//{
-	//	//There is no Stamina
-
-	//}
-	//else {
-	//	//PlaySound Effects Empty
-	//	if (EmptyBulletSound) {
-	//		UGameplayStatics::PlaySoundAtLocation(this, EmptyBulletSound, GetActorLocation());
-	//	}
-	//}
+	if (BasicAttack != nullptr)
+	{
+		BasicAttack->Execute();
+	}
 }
 
 void ARevanantCpp::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -145,6 +157,7 @@ void ARevanantCpp::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &ARevanantCpp::AimOff);
 
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ARevanantCpp::Reload);
+		EnhancedInputComponent->BindAction(EssentialAttackAction, ETriggerEvent::Started, this, &ARevanantCpp::Attack);
 	}
 }
 
@@ -157,11 +170,6 @@ void ARevanantCpp::Tick(float delta)
 void ARevanantCpp::CheckCameraLoc(float dt)
 {
 	Super::CheckCameraLoc(dt);
-}
-
-FVector ARevanantCpp::GetProjecticleDirection(float RayDistance)
-{
-	return Super::GetProjecticleDirection(RayDistance);
 }
 
 

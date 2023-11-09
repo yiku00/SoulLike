@@ -6,24 +6,27 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "Interface/CharacterHUDInterface.h"
+#include "Interface/CharacterSkillInterface.h"
 #include "SoulLikeCharacter.generated.h"
 
 UCLASS(config=Game)
-class ASoulLikeCharacter : public ACharacter, public ICharacterHUDInterface
+class ASoulLikeCharacter : public ACharacter, 
+	public ICharacterHUDInterface,
+	public ICharacterSkillInterface
 {
 	GENERATED_BODY()
 public:
-	ASoulLikeCharacter(); // 
+	ASoulLikeCharacter();
 	
 protected:
-	/** Camera boom positioning the camera behind the character */
+	//Basic Game Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USpringArmComponent> CameraBoom;
 
-	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> FollowCamera;
-protected: //Character Stat Section
+protected: 
+	//Character Stat Section
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCharacterStatManager> StatManager;
 
@@ -32,32 +35,25 @@ protected: //Character Stat Section
 
 	FName CharacterName;
 protected:
+	//HUD Interface override Function
 	virtual void InitStatUI();
+protected:
+	//Input Section Value Section
 
-public:
-	const float GetMaxHp();
-	const float GetMaxMp();
-	const float GetMaxStamina();
-private: //Input Section
-	/** MappingContext */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> EssentialAttackAction;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
-	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> MoveAction;
 
-	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> LookAction;
 
-	/*This is for Essential Attack Action that can be called very rappidly*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> EssentialAttackAction; // skill essential attack
-
-	/*EscapeAction, player can dodge Enemy's Attack for Playing Doge Action Skill*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UInputAction> EscapeAction; //not valueable more+
+	TObjectPtr<class UInputAction> EscapeAction; 
 protected: //for animation blueprint
 	UPROPERTY()
 	FVector LastUpdatedDirection; 
@@ -65,10 +61,12 @@ protected: //for animation blueprint
 	UPROPERTY()
 	bool IsAttacking;
 protected:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	//Essential Game Function Section
 	virtual void BeginPlay();
 	virtual void Tick(float delta) override;
-
+protected: 
+	//Input function Section
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	virtual void EssentialAttack(const FInputActionValue& Value); 
@@ -86,6 +84,13 @@ protected:
 
 	//This Method Make Statmanager to Load Charater's Essential Stat Data from Data Table
 	virtual void LoadCharacterData(FName InName);
+protected:
+	//Skill Interface Function Override
+	virtual void CostHp(float InHp) override;					//Additional API for readablility
+	virtual void CostMp(float InMp) override;					//Additional API for readablility
+	virtual void CostStatmina(float InStamina) override;		//Additional API for readablility
+	virtual void CostBullet(uint32 InCnt) override;				//Additional API for readablility
+	virtual void SetupSkill(class USkill* NewSkill) override;	//Set Skill's Data And Connect Skill With StatComponent's Delegate
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

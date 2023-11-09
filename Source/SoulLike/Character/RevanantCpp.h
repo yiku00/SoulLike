@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SoulLikeCharacter.h"
-
 #include "GunFightCharacter.h"
+#include "Interface/RevanantSkillInterface.h"
 #include "RevanantCpp.generated.h"
 
 /**
@@ -13,17 +12,12 @@
  */
 
 UCLASS()
-class SOULLIKE_API ARevanantCpp : public AGunFightCharacter
+class SOULLIKE_API ARevanantCpp : public AGunFightCharacter , public IRevanantSkillInterface
 {
+
 	GENERATED_BODY()
 public:
 	ARevanantCpp();
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE uint8 GetCurrentBullet() {return 0;};
-
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE uint8 GetMaxBullet() { return 0; };
 protected:
 	virtual void Attack(const FInputActionValue& Value);
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -31,6 +25,23 @@ protected:
 	virtual void CheckCameraLoc(float dt) override;
 	virtual void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
+
+protected:
+	//Revanant Skill Interface Function Override
+	virtual bool GetReloadingFlag() override { return isReloading; }; //retrun isReloading;
+	virtual bool GetAimFlag() override { return IsAiming; }; //IsAiming;
+	virtual bool GetAttackFlag()override { return IsAttacking; };
+	virtual FVector GetSocketLocation() override { return GetMesh()->GetSocketLocation(MuzzleSocketName); };		//return Projecticle's Spawning Socket Location 
+	virtual FVector GetPlayerAimingDirection() override;	//return Player's Watching Vector
+	virtual FVector GetCameraLocation() override;		//return Camera's Location
+	virtual FRotator GetPawnRotation()override;			//return Character's Rotation
+	virtual void SetIsAttack(bool NewBool) override { IsAttacking = NewBool; };		//Set Attack Flag
+	virtual void SetIsReloading(bool NewBool) override { isReloading = NewBool; };	//Set Reloading Flag
+	virtual void SetIsAiming(bool NewBool) override { IsAiming = NewBool; };		//Set Aiming Flag
+	virtual void PlayMontageFromSkill(class UAnimMontage* AnimMontage)override;
+	virtual UWorld* GetPawnWorld()override { return GetWorld(); };
+	virtual void FillBulletMax() override;
 private:
 	float FireStaminaCost;
 	float AimStaminaCost;
@@ -41,11 +52,10 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* ReloadAction;
-
-	virtual FVector GetProjecticleDirection(float RayDistance) override;
 	void Aim(const FInputActionValue& Value) override;
 	void AimOff(const FInputActionValue& Value) override;
 	void Reload(const FInputActionValue& Value) override;
 
-	
+	class USkill* BasicAttack;
+	class USkill* ReloadSkill;
 };

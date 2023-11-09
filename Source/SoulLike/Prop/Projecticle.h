@@ -4,7 +4,6 @@
 #include <Components/SphereComponent.h>
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Projecticle.generated.h"
 
 UCLASS()
@@ -39,14 +38,15 @@ public:
 protected:
 
 private:
-	ACharacter* SpawnerRef;
+	UPROPERTY()
+	TObjectPtr<UObject> SpawnerRef;
 	
 public:	
 	// Sets default values for this actor's properties
 	AProjecticle();
 
 	UFUNCTION(BlueprintCallable, Category = "VectorOperations")
-	void FireInDirection(const FVector& ShootDirection, ACharacter* Caller);
+	void FireInDirection(const FVector& ShootDirection, UObject* Caller);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

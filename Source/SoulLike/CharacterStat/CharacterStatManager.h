@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "CharacterStat/CharacterDataStructures.h"
+#include "Interface/StatInterface.h"
 #include "CharacterStatManager.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpUpdated,float)
@@ -28,19 +29,27 @@ public:
 	FORCEINLINE const float GetCurrentHp() { return CurrentHp; }
 	FORCEINLINE const float GetCurrentMp() { return CurrentMp; }
 	FORCEINLINE const float GetCurrentStamina() { return CurrentStamina; }
-	FORCEINLINE const float GetMaxBullet() { return GunFighterData.MaxBulletCnt; }
+	FORCEINLINE const uint32 GetMaxBullet() { return GunFighterData.MaxBulletCnt; }
 	FORCEINLINE const float GetCurrentBullet() { return CurrentBulletCnt; }
+
+	//Essential Character Stat Function Section
+	void SetCurrentHp(const float NewHp);
+	void SetCurrentMp(const float NewMp);
+	void SetCurrentStamina(const float NewStamina);
+	void SetCurrentBullet(const uint32 NewCnt);
+
+	//Additional API 
+	void CostHp(const float InHp);
+	void CostMp(const float InMp);
+	void CostStamina(const float InStamina);
+	void CostBullet(const uint32 InCnt);
 protected:
 	// Essential virtual Function
 	virtual void BeginPlay() override;
 	void TickStaminaLogic(float dt);
 	void TickHpLogic(float dt);
 private:
-	//Essential Character Stat Function Section
-	FORCEINLINE void SetHp(float NewHp) { CurrentHp = NewHp; OnHpUpdatedDelegate.Broadcast(CurrentHp); }
-	FORCEINLINE void SetMp(float NewMp) { CurrentMp = NewMp; OnMpUpdatedDelegate.Broadcast(CurrentMp);}
-	FORCEINLINE void SetStamina(float NewStamina) { CurrentStamina = NewStamina; OnStaminaUpdatedDelegate.Broadcast(CurrentStamina);}
-	FORCEINLINE void SetCurrentBullet(uint32 NewCnt) { CurrentBulletCnt = NewCnt; OnCurrentBulletUpdated.Broadcast(CurrentBulletCnt); }
+	
 
 public:
 	//these delegate should be connected in Character's class

@@ -30,7 +30,7 @@ void UCharacterStatManager::TickStaminaLogic(float dt)
 	{
 		CurrentStamina += CharacterData.StaminaRecoveryRate * dt;
 	}
-	SetStamina(CurrentStamina);
+	SetCurrentStamina(CurrentStamina);
 }
 
 void UCharacterStatManager::TickHpLogic(float dt)
@@ -57,9 +57,9 @@ void UCharacterStatManager::LoadCharacterData(FName CharacterName)
 
 		if (RowData) {
 			CharacterData = *RowData;
-			SetHp(CharacterData.MaxHp);
-			SetMp(CharacterData.MaxMp);
-			SetStamina(CharacterData.MaxStamina);
+			SetCurrentHp(CharacterData.MaxHp);
+			SetCurrentMp(CharacterData.MaxMp);
+			SetCurrentStamina(CharacterData.MaxStamina);
 		}
 		else
 		{
@@ -92,4 +92,72 @@ void UCharacterStatManager::LoadGunFighterCharacterData(FName CharacterName)
 	else {
 		UE_LOG(LogTemp, Error, TEXT("UDataTable Load Fail"));
 	}
+}
+
+void UCharacterStatManager::SetCurrentHp(const float NewHp)
+{
+	CurrentHp = NewHp;
+	OnHpUpdatedDelegate.Broadcast(CurrentHp);
+}
+
+void UCharacterStatManager::SetCurrentMp(const float NewMp)
+{
+	CurrentMp = NewMp; 
+	OnMpUpdatedDelegate.Broadcast(CurrentMp);
+}
+
+void UCharacterStatManager::SetCurrentStamina(const float NewStamina)
+{
+	CurrentStamina = NewStamina; 
+	OnStaminaUpdatedDelegate.Broadcast(CurrentStamina);
+}
+
+void UCharacterStatManager::SetCurrentBullet(const uint32 NewCnt)
+{
+	CurrentBulletCnt = NewCnt; 
+	OnCurrentBulletUpdated.Broadcast(CurrentBulletCnt);
+}
+
+//Additional API for readability
+void UCharacterStatManager::CostHp(const float InHp)
+{
+	if (InHp <= 0)
+	{
+		return;
+	}
+
+	const float NewHp = CurrentHp - InHp;
+	SetCurrentHp(NewHp);
+}
+
+void UCharacterStatManager::CostMp(const float InMp)
+{
+	if (InMp <= 0)
+	{
+		return;
+	}
+
+	const float NewMp = CurrentMp - InMp;
+	SetCurrentMp(NewMp);
+}
+void UCharacterStatManager::CostStamina(const float InStamina)
+{
+	if (InStamina <= 0)
+	{
+		return;
+	}
+
+	const float NewStamina = CurrentStamina - InStamina;
+	SetCurrentStamina(NewStamina);
+}
+
+void UCharacterStatManager::CostBullet(const uint32 InCnt)
+{
+	if (InCnt <= 0)
+	{
+		return;
+	}
+
+	uint32 NewCnt = CurrentBulletCnt - InCnt;
+	SetCurrentBullet(NewCnt);
 }

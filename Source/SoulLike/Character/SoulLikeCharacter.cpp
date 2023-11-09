@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "CharacterStat/CharacterStatManager.h"
 #include "UI/MainHUDCpp.h"
+#include "Skill/Skill.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ASoulLikeCharacter 
@@ -74,22 +75,6 @@ void ASoulLikeCharacter::InitStatUI()
 		StatManager->OnMpUpdatedDelegate.AddUObject(MyWidget, &UMainHUDCpp::UpdateMpPercentage);
 		StatManager->OnStaminaUpdatedDelegate.AddUObject(MyWidget, &UMainHUDCpp::UpdateStaminaPercentage);
 	}
-}
-
-const float ASoulLikeCharacter::GetMaxHp()
-{
-	//StatManager->Get
-	return 0.0f;
-}
-
-const float ASoulLikeCharacter::GetMaxMp()
-{
-	return 0.0f;
-}
-
-const float ASoulLikeCharacter::GetMaxStamina()
-{
-	return 0.0f;
 }
 
 void ASoulLikeCharacter::BeginPlay()
@@ -238,4 +223,49 @@ void ASoulLikeCharacter::LoadCharacterData(FName InName)
 {
 	//load Essential Stat Data 
 	StatManager->LoadCharacterData(CharacterName);
+}
+
+
+//Character Skill Interface Function Declaration 
+void ASoulLikeCharacter::CostHp(float InHp)
+{
+	StatManager->CostHp(InHp);
+}
+
+void ASoulLikeCharacter::CostMp(float InMp)
+{
+	StatManager->CostMp(InMp);
+}
+
+void ASoulLikeCharacter::CostStatmina(float InStamina)
+{
+	StatManager->CostStamina(InStamina);
+}
+
+void ASoulLikeCharacter::CostBullet(uint32 InCnt)
+{
+	StatManager->CostBullet(InCnt);
+}
+
+void ASoulLikeCharacter::SetupSkill(USkill* NewSkill)
+{
+	//connect 
+	NewSkill->UpdateOwnerHp(StatManager->GetCurrentHp());
+	NewSkill->UpdateOwnerMp(StatManager->GetCurrentMp());
+	NewSkill->UpdateOwnerStamina(StatManager->GetCurrentStamina());
+	NewSkill->UpdateOwnerCurrentBullet(StatManager->GetCurrentBullet());
+
+	NewSkill->UpdateOwnerMaxHp(StatManager->GetMaxHp());
+	NewSkill->UpdateOwnerMaxMp(StatManager->GetMaxMp());
+	NewSkill->UpdateOwnerMaxStamina(StatManager->GetMaxStamina());
+	NewSkill->UpdateOwnerMaxBullet(StatManager->GetMaxBullet());
+
+	StatManager->OnHpUpdatedDelegate.AddUObject(NewSkill, &USkill::UpdateOwnerHp);
+	StatManager->OnMpUpdatedDelegate.AddUObject(NewSkill, &USkill::UpdateOwnerMp);
+	StatManager->OnStaminaUpdatedDelegate.AddUObject(NewSkill, &USkill::UpdateOwnerStamina);
+	StatManager->OnCurrentBulletUpdated.AddUObject(NewSkill, &USkill::UpdateOwnerCurrentBullet);
+
+	ensure(GetMesh() != nullptr);
+	ensure(GetMesh()->GetAnimInstance() != nullptr);
+	NewSkill->SetUpAnimDelegate(GetMesh()->GetAnimInstance()->OnMontageEnded);
 }

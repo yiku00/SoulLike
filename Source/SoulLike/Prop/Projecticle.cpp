@@ -45,7 +45,7 @@ AProjecticle::AProjecticle()
 
 }
 
-void AProjecticle::FireInDirection(const FVector& ShootDirection, ACharacter* Caller)
+void AProjecticle::FireInDirection(const FVector& ShootDirection, UObject* Caller)
 {
     SpawnerRef = Caller;
     ProjectileMovement->Velocity = ShootDirection * ProjectileMovement->InitialSpeed;
